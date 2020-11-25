@@ -10,6 +10,7 @@ import urllib
 import threading
 import queue
 import logging
+import sys, getopt
 
 from os import path, makedirs
 from copy import copy
@@ -850,10 +851,18 @@ def init():
     global WORDS, TODO, DONE, THREAD_COUNT
 
     # Getting Arguments
+    cmd_config = ''
+
+    opts, args = getopt.getopt(sys.argv[1:],"c:",["config="])
+    for opt, arg in opts:
+        if opt in ("-c", "--config"):
+            cmd_config = arg
 
     if not path.exists(path.join(PACKAGE_DIR, 'config')):
         write_log('INIT', 'No config folder available.')
         USE_CONFIG = False
+    elif cmd_config:
+        USE_CONFIG = True
     else:
         write_log('INIT', 'Should spidy load settings from an available config file? (y/n):')
         input_ = input()
@@ -868,8 +877,11 @@ def init():
 
     if USE_CONFIG:
         try:
-            write_log('INIT', 'Config file name:', status='INPUT')
-            input_ = input()
+            if cmd_config:
+                input_ = cmd_config
+            else:
+                write_log('INIT', 'Config file name:', status='INPUT')
+                input_ = input()
             if input_[-4:] == '.cfg':
                 file_path = path.join(PACKAGE_DIR, 'config', input_)
             else:
